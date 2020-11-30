@@ -12,17 +12,17 @@ while flag!="q":
 		outer_links_path="D:\win2vultr\outer_links.txt"
 		outer_links_path2="D:\win2vultr\outer_links2.txt"
 
-		with open(outer_links_path,"w",encoding="utf-8") as f:
-			f.write("\n")
-			f.write(links_s)
-			f.write("\n")
-		
-		with open(outer_links_path2,"a",encoding="utf-8") as f:
-			f.write("\n")
-			f.write(links_s)
-			f.write("\n")
+	with open(outer_links_path,"w",encoding="utf-8") as f:
+		f.write("\n")
+		f.write(links_s)
+		f.write("\n")
+	
+	with open(outer_links_path2,"a",encoding="utf-8") as f:
+		f.write("\n")
+		f.write(links_s)
+		f.write("\n")
 
-		print("one done.")
+	print("one done.")
 
 	flag=input("q for quit. Quit?")
 
