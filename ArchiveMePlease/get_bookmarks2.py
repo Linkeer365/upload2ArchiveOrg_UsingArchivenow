@@ -3,13 +3,12 @@ import re
 
 import subprocess
 
-from upload2ArchiveOrg import get_links
+from upload2ArchiveOrg2 import get_links
 
 # import requests
 
-bookmarks_path=r"C:\Users\linsi\AppData\Local\CentBrowser\User Data\Default\Bookmarks"
-bookmarks_save_path=r"D:\ArchiveMePlease\bookmarks.txt"
-bookmarks_save_path2=r"D:\win2vultr\outer_links.txt"
+bookmarks_path="/root/ArchiveMePlease/Bookmarks"
+bookmarks_save_path="/root/ArchiveMePlease/bookmarks.txt"
 
 if os.path.exists(bookmarks_save_path):
 	with open(bookmarks_save_path,"r",encoding="utf-8") as f:
@@ -24,10 +23,6 @@ links=[each for each in links if not each in old_bookmarks_set]
 links_s="\n".join(links)
 
 with open(bookmarks_save_path,"a",encoding="utf-8") as f:
-	f.write(links_s)
-	f.write("\n")
-
-with open(bookmarks_save_path2,"a",encoding="utf-8") as f:
 	f.write(links_s)
 	f.write("\n")
 
