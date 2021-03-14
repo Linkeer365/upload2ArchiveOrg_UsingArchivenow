@@ -24,7 +24,7 @@ output_path2="/root/ArchiveMePlease/output2.txt"
 
 already_path="/root/ArchiveMePlease/already_upload.txt"
 
-bad_links_path="/root/ArchiveMePlease/fail_to_upload.txt"
+# bad_links_path="/root/ArchiveMePlease/fail_to_upload.txt"
 
 outer_links_path="/root/ArchiveMePlease/outer_links.txt"
 outer_links_path2="/root/ArchiveMePlease/outer_links2.txt"
@@ -33,7 +33,7 @@ outer_links_path2="/root/ArchiveMePlease/outer_links2.txt"
 ifnotmkfiles(output_path)
 # ifnotmkfiles(output_path2)
 # ifnotmkfiles(already_path)
-ifnotmkfiles(bad_links_path)
+# ifnotmkfiles(bad_links_path)
 ifnotmkfiles(outer_links_path)
 # ifnotmkfiles(outer_links_path2)
 
@@ -86,7 +86,7 @@ def set_proxy():
     os.system(comm1)
     os.system(comm2)
 
-def upload_one_link(some_link,already_path,bad_links_path):
+def upload_one_link(some_link,already_path):
     # comm1 = "set http_proxy=socks5://127.0.0.1:10086"
     # comm2 = "set https_proxy=socks5://127.0.0.1:10086"
 
@@ -107,8 +107,8 @@ def upload_one_link(some_link,already_path,bad_links_path):
     output_s=output[-1]
     if output_s[0:5]=="Error":
         print("fail!")
-        with open (bad_links_path, "a", encoding="utf-8") as f:
-            f.write(some_link+"\n")
+        # with open (bad_links_path, "a", encoding="utf-8") as f:
+        #     f.write(some_link+"\n")
         return False
     elif output_s[0:5]=="https":
         print("success!")
@@ -146,19 +146,21 @@ def main():
         already_links=[each.strip("\n") for each in f.readlines()]
         already_links_set=set(already_links)
 
-    bad_links=[]
-    with open(bad_links_path,"r",encoding="utf-8") as f:
-        bad_links=[each.strip("\n") for each in f.readlines()]
-        bad_links_set=set(bad_links)
+    # bad_links=[]
+    # with open(bad_links_path,"r",encoding="utf-8") as f:
+    #     bad_links=[each.strip("\n") for each in f.readlines()]
+    #     bad_links_set=set(bad_links)
     # bad_links=[]
 
     for each_link in links:
         # set_proxy()
-        if each_link in already_links_set or each_link in bad_links_set:
+        if each_link in already_links_set:
             # print("already!")
             continue
         else:
-            res=upload_one_link(each_link,already_path,bad_links_path)
+            res=False
+            while not res:
+                res=upload_one_link(each_link,already_path)
     print("All down.")
     os.system(f"cat {output_path} >> {output_path2} && rm {output_path}")
     os.system(f"cat {outer_links_path} >> {outer_links_path2} && rm {outer_links_path}")

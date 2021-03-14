@@ -1,12 +1,12 @@
 import os
 import re
-import sys
 
 import subprocess
 
 # import requests
 
-bookmarks_path=r"C:\Users\linsi\AppData\Local\CentBrowser\User Data\Default\Bookmarks"
+bookmarks_path="/root/ArchiveMePlease/Bookmarks"
+bookmarks_path2="/root/ArchiveMePlease/bookmarks.txt"
 
 check_url="https://archive.org/"
 
@@ -14,16 +14,33 @@ headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36"
 }
 
-output_path=r"D:\upload2ArchiveOrg_UsingArchivenow\ArchiveMePlease\output.txt"
+def ifnotmkfiles(some_path):
+    if not os.path.exists(some_path):
+        print(f"makefile!\t{some_path}")
+        open(some_path,"a").close()
 
-already_path=r"D:\upload2ArchiveOrg_UsingArchivenow\ArchiveMePlease\already_upload.txt"
+output_path="/root/ArchiveMePlease/output.txt"
+output_path2="/root/ArchiveMePlease/output2.txt"
 
-bad_links_path=r"D:\upload2ArchiveOrg_UsingArchivenow\ArchiveMePlease\fail_to_upload.txt"
+already_path="/root/ArchiveMePlease/already_upload.txt"
 
-# outer_links_path=r"D:\upload2ArchiveOrg_UsingArchivenow\ArchiveMePlease\outer_links.txt"
-outer_links_path=r"D:\upload2ArchiveOrg_UsingArchivenow\ArchiveMePlease\outer_links.txt"
+bad_links_path="/root/ArchiveMePlease/fail_to_upload.txt"
 
-done_flag=0
+outer_links_path="/root/ArchiveMePlease/outer_links.txt"
+outer_links_path2="/root/ArchiveMePlease/outer_links2.txt"
+
+# ifnotmkfiles(bookmarks_path)
+ifnotmkfiles(output_path)
+# ifnotmkfiles(output_path2)
+# ifnotmkfiles(already_path)
+ifnotmkfiles(bad_links_path)
+
+if not os.path.exists(outer_links_path):
+    print("no outer links!")
+    os.system(f"cat {bad_links_path} >> {outer_links_path}")
+
+# ifnotmkfiles(outer_links_path2)
+
 
 def get_links(folder_name):
     with open(bookmarks_path,"r",encoding="utf-8") as f:
@@ -74,20 +91,23 @@ def set_proxy():
     os.system(comm2)
 
 def upload_one_link(some_link,already_path,bad_links_path):
-    # print(some_link+"\n")
-    comm1 = "set http_proxy=socks5://127.0.0.1:10086"
-    comm2 = "set https_proxy=socks5://127.0.0.1:10086"
+    # comm1 = "set http_proxy=socks5://127.0.0.1:10086"
+    # comm2 = "set https_proxy=socks5://127.0.0.1:10086"
 
     # comm3="echo done"
 
+    # comm4=f"archivenow \"{some_link}\""
     comm4=f"archivenow \"{some_link}\""
 
-    comm=f"{comm1}&&{comm2}&&{comm4} >> {output_path}"
+    comm=f"{comm4} >> {output_path}"
 
     os.system(comm)
-
-    with open(output_path,"r",encoding="gbk") as f:
-        output=f.readlines()
+    try:
+        with open(output_path,"r",encoding="utf-8") as f:
+            output=f.readlines()
+    except UnicodeDecodeError:
+        with open(output_path,"r",encoding="gbk") as f:
+            output=f.readlines()
     output_s=output[-1]
     if output_s[0:5]=="Error":
         print("fail!")
@@ -103,15 +123,17 @@ def upload_one_link(some_link,already_path,bad_links_path):
 
 def main():
     folder_name="ArchiveMePlease!"
-    # links=get_links(folder_name)
-    links=[]
+    if os.path.exists(bookmarks_path):
+        links=get_links(folder_name)
+    else:
+        links=[]
 
     # 外部链接（不想一个个去点击收藏的那种，一次性获取很多链接的那种类型）
 
     outer_links=[]
 
     with open(outer_links_path,"r",encoding="utf-8") as f:
-        outer_links=[each.strip("\n") for each in f.readlines()]
+        outer_links=[each.strip("\n") for each in f.readlines() if each!="\n"]
     
     links.extend(outer_links)
 
@@ -128,23 +150,31 @@ def main():
         already_links=[each.strip("\n") for each in f.readlines()]
         already_links_set=set(already_links)
 
-    # bad_links=[]
+    bad_links=[]
+    with open(bad_links_path,"r",encoding="utf-8") as f:
+        bad_links=[each.strip("\n") for each in f.readlines()]
+        bad_links_set=set(bad_links)
+    
+    if links==[]:
+        links=bad_links
+        bad_links_set=set()
 
-    if set(links) in already_links_set:
-        print("done.")
-        sys.exit(0)
+    # bad_links=[]
 
     for each_link in links:
         # set_proxy()
-        if each_link in already_links_set:
-            print("already!")
+        if each_link in already_links_set or each_link in bad_links_set:
+            # print("already!")
             continue
         else:
             res=upload_one_link(each_link,already_path,bad_links_path)
-    
-    print("next turn.")
+    print("All down.")
+    os.system(f"cat {output_path} >> {output_path2} && rm {output_path}")
+    os.system(f"cat {outer_links_path} >> {outer_links_path2} && rm {outer_links_path}")
+    if os.path.exists(bookmarks_path):
+        os.system(f"cat {bookmarks_path} >> {bookmarks_path2} && rm {bookmarks_path}")
             # if not res:
-            #     bad_links.append(each_link)
+            #     links.append(each_link)
             # else:
             #     already_links_set.add(each_link)
 
@@ -176,8 +206,7 @@ def main():
     # # good_links_s="\n".join(good_links)
 
 if __name__ == '__main__':
-    while True:
-        main()
+    main()
 
 
 
