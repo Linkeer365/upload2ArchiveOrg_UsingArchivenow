@@ -1,7 +1,8 @@
 import os
 import re
 import sys
-
+import shutil
+import time
 import subprocess
 
 # import requests
@@ -14,19 +15,21 @@ headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36"
 }
 
-output_path=r"D:\upload2ArchiveOrg_UsingArchivenow\ArchiveMePlease\output.txt"
+output_path=r".\ArchiveMePlease\output.txt"
 
-already_path=r"D:\upload2ArchiveOrg_UsingArchivenow\ArchiveMePlease\already_upload.txt"
+already_path=r".\ArchiveMePlease\already_upload.txt"
 
-bad_links_path=r"D:\upload2ArchiveOrg_UsingArchivenow\ArchiveMePlease\fail_to_upload.txt"
+bad_links_path=r".\ArchiveMePlease\fail_to_upload.txt"
 
-# outer_links_path=r"D:\upload2ArchiveOrg_UsingArchivenow\ArchiveMePlease\outer_links.txt"
-outer_links_path=r"D:\upload2ArchiveOrg_UsingArchivenow\ArchiveMePlease\outer_links.txt"
+# outer_links_path=r".\ArchiveMePlease\outer_links.txt"
+outer_links_path=r".\ArchiveMePlease\outer_links.txt"
 
 done_flag=0
 
 def get_links(folder_name):
-    with open(bookmarks_path,"r",encoding="utf-8") as f:
+    bookmarks_path2=bookmarks_path+'2'
+    shutil.copy(bookmarks_path,bookmarks_path2)
+    with open(bookmarks_path2,"r",encoding="utf-8") as f:
         bookmarks=f.readlines()
 
     idx=len(bookmarks)-1
@@ -102,47 +105,75 @@ def upload_one_link(some_link,already_path,bad_links_path):
 
 
 def main():
+    # sys.exit(1)
     folder_name="ArchiveMePlease!"
-    # links=get_links(folder_name)
-    links=[]
+    # 需要使用ArchiveMePlease时再打开
+    links=get_links(folder_name)
+    # links=[]
 
     # 外部链接（不想一个个去点击收藏的那种，一次性获取很多链接的那种类型）
 
     outer_links=[]
+    already_links_set=set()
 
     with open(outer_links_path,"r",encoding="utf-8") as f:
-        outer_links=[each.strip("\n") for each in f.readlines()]
+        lines=f.readlines()
+        print("lines[-1]:",lines[-1])
+        if lines[-1]=='done.\n':
+            outer_links=[]
+        else:
+            outer_links=[each.strip("\n") for each in lines if each.startswith("http")]
+            links.extend(outer_links)
     
-    links.extend(outer_links)
-
-
-    # if requests.get(check_url,headers=headers,timeout=10).status_code==200:
-    #     print("connection good!")
-    # else:
-    #     print("connection bad!")
-    cnt=0
-
-    # good_links=[]
-    already_links=[]
-    with open(already_path,"r",encoding="utf-8") as f:
-        already_links=[each.strip("\n") for each in f.readlines()]
-        already_links_set=set(already_links)
+    if outer_links==[]:
+        with open(bad_links_path,"r",encoding="utf-8") as f:
+            lines=f.readlines()
+            bad_links=[each.strip("\n") for each in lines if each.startswith("http")]
+            print("in sec term...")
+        if bad_links==[]:
+            print("all done.")
+            # 只有这里才是安全出口...
+            sys.exit(0)
+        else:
+            links.extend(bad_links)
+    elif outer_links!=[]:
+        # good_links=[]
+        # 如果你是第二次，那么already在之前就已经被读取过了...
+        with open(already_path,"r",encoding="utf-8") as f:
+            already_links=[each.strip("\n") for each in f.readlines() if each.startswith("http")]
+            already_links_set=set(already_links)
+    
+    open(bad_links_path,"w").close()
+    # sys.exit(0)
 
     # bad_links=[]
 
-    if set(links) in already_links_set:
-        print("done.")
-        sys.exit(0)
-
-    for each_link in links:
-        # set_proxy()
-        if each_link in already_links_set:
-            print("already!")
-            continue
-        else:
-            res=upload_one_link(each_link,already_path,bad_links_path)
+    # if set(links) in already_links_set:
+    #     print("done.")
+    #     sys.exit(0)
+    links_len=len(links)
+    for idx,each_link in enumerate(links,1):
+        a=time.time()
+        # # set_proxy()
+        if already_links_set!=set():
+            if each_link in already_links_set:
+                print("already!")
+                continue
+        # else:
+        print(f"第{idx}项 （共{links_len}项）")
+        res=upload_one_link(each_link,already_path,bad_links_path)
+        b=time.time()
+        time_cost=b-a
+        print(f"用时:{time_cost}s")
     
     print("next turn.")
+
+    with open(outer_links_path,"a",encoding="utf-8") as f:
+        f.write("done.\n")
+    # 抛出错误，因为还没有完成最终的任务...
+    sys.exit(1)
+    
+
             # if not res:
             #     bad_links.append(each_link)
             # else:
@@ -176,8 +207,7 @@ def main():
     # # good_links_s="\n".join(good_links)
 
 if __name__ == '__main__':
-    while True:
-        main()
+    main()
 
 
 

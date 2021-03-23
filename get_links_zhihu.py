@@ -17,10 +17,12 @@ while flag!="q":
             max_page_num=int(max_num)//20+1 if int(max_num)%20!=0 else int(max_num)/20
         # 结尾的/要丢掉
         question_link=question_link.strip("/")
+        ori_question_link=question_link
         question_link+="/answers/updated?page="
         # print("max page:",max_page_num)
         max_page_num=int(max_page_num)
         links=[question_link+str(each) for each in range(1,max_page_num+1)]
+        links.append(ori_question_link)
         all_links.extend(links)
         
     links_s="\n".join(all_links)
