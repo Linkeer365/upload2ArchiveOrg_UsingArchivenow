@@ -18,6 +18,10 @@ while flag!="q":
         # 结尾的/要丢掉
         question_link=question_link.strip("/")
         ori_question_link=question_link
+        # 注意，末尾的/有区别
+        ## https://www.zhihu.com/question/372020003 √
+        ## https://www.zhihu.com/question/372020003/ ×
+        ## 一定要意识！
         question_link+="/answers/updated?page="
         # print("max page:",max_page_num)
         max_page_num=int(max_page_num)

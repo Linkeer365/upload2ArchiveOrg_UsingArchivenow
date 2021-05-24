@@ -94,6 +94,7 @@ def upload_one_link(some_link,already_path,bad_links_path):
     output_s=output[-1]
     if output_s[0:5]=="Error":
         print("fail!")
+        print(some_link)
         with open (bad_links_path, "a", encoding="utf-8") as f:
             f.write(some_link+"\n")
         return False
