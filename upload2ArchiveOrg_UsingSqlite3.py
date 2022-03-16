@@ -49,7 +49,7 @@ def get_timespent(prev_time):
 # print(type(date_obj))
 # sys.exit(0)
 
-with open("./ArchiveMePlease/outer_links.txt","r",encoding="utf-8") as f:
+with open("./ArchiveMePlease/inside_links.txt","r",encoding="utf-8") as f:
     links=[e.strip("\n") for e in f.readlines() if e!="\n"]
 
 conn=sqlite3.connect("./ArchiveMePlease/webpage.db")
